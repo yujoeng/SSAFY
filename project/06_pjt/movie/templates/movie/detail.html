@@ -1,0 +1,52 @@
+{% extends 'movie/base.html' %}
+
+{% block title %}{{ movie.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title mb-4">{{ movie.title }}</h1>
+                
+                <div class="mb-3">
+                    <h5>줄거리</h5>
+                    <p>{{ movie.description }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h5>감독</h5>
+                    <p>{{ movie.director }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h5>장르</h5>
+                    <p>{{ movie.get_genre_display }}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>평점</h5>
+                    <p>{{ movie.score }} / 10</p>
+                </div>
+                
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'movie:update' movie.pk %}" class="btn btn-warning">수정하기</a>
+                    
+                    <form method="post" action="{% url 'movie:delete' movie.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제하기</button>
+                    </form>
+                    
+                    <a href="{% url 'movie:index' %}" class="btn btn-secondary">목록으로</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 댓글 기능은 추후 추가 예정 -->
+        <div class="mt-4">
+            <h3>댓글</h3>
+            <p class="text-muted">댓글 기능은 추후 추가될 예정입니다.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
