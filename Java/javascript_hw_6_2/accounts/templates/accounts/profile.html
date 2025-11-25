@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>{{ person.username }}님의 프로필</h1>
+  <div> 
+    <div>
+      팔로잉 : {{ person.followings.all|length }} / 팔로워 : {{ person.followers.all|length }}
+    </div>
+    {% if request.user != person %}
+      <div>
+        <form id="follow-form">
+          {% csrf_token %}
+          {% if request.user in person.followers.all %}
+            <input type="submit" value="Unfollow">
+          {% else %}
+            <input type="submit" value="Follow">
+          {% endif %}
+        </form>
+    </div>
+    {% endif %}
+  </div>  
+  <hr>
+  <h2>{{ person.username }}가 작성한 게시글</h2>
+  {% for article in person.article_set.all %}
+    <div>{{ article.title }}</div>
+  {% endfor %}
+  <hr>
+  <h2>{{ person.username }}가 작성한 댓글</h2> 
+  {% for comment in person.comment_set.all %} 
+    <div>{{ comment.content }}</div> 
+  {% endfor %}
+  
+  <hr>
+  <h2>{{ person.username }}가 좋아요한 게시글</h2> 
+  {% for article in person.like_articles.all %} 
+    <div>{{ article.title }}</div> 
+  {% endfor %}
+
+
+  <!-- 1. axios 라이브러리 로드 -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  
+  <script>  
+    // 팔로우 버튼 submit 막는 JS
+    const followForm = document.querySelector('#follow-form')
+
+    if (followForm) {
+      const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+      // Django url 템플릿 태그로 팔로우 URL 문자열 생성
+      const followUrl = "{% url 'accounts:follow' person.pk %}"
+
+      // submit 이벤트 가로채기 
+      followForm.addEventListener('submit', function (event) {
+        // 기본 동작(폼 전송 → 페이지 이동) 막기
+        event.preventDefault()
+        // axios로 POST 요청 보내기
+        console.log('팔로우 버튼 클릭!')
+        
+        axios({
+          method: 'post',
+          url: followUrl,
+          headers:{
+            // Django 는  X-CSRFToken 헤더에 토큰을 기대함
+            'X-CSRFToken':csrf_token,
+          },
+        })
+        .then(function (response){
+          // 요청 성공 후 화면 새로고침 (버튼 상태/팔로워 수 갱신용)
+          // 나중에는 location.reload 대신 DOM만 바꿔도 가능함
+          window.location.reload()
+        })
+        .catch(function (error){
+          console.error(error)
+        })
+      })
+    }
+  </script>
+</body>
+</html>
